@@ -6,7 +6,7 @@ pipeline {
     }
 
     stages{
-        stage('Check and remove container'){
+        stage('Check if a container new exists and remove container'){
             steps{
                 script{
                     def containerExists = sh(script: "docker ps -q -f name=new", returnStdout: true).trim()
@@ -17,33 +17,33 @@ pipeline {
                 }
             }
         }
-        stage('Build package'){
+        stage('Run Maven to compile and package the application'){
             steps{
                 sh 'mvn clean package'
             }
         }
-        stage('Create image'){
+        stage('Create image- Build a Docker image from project directory'){
             steps{
                 sh 'sudo docker build -t app /var/lib/jenkins/workspace/task/'
             }
         }
-        stage('Assign tag'){
+        stage('Create a new tag'){
             steps{
                 sh 'docker tag app harsh5900/newapp'
             }
         }
-        stage('Push to dockerhub'){
+        stage('Push the image to dockerhub'){
             steps{
                 sh 'echo "Harshitha@9500" | docker login -u "harsh5900" --password-stdin'
                 sh 'docker push harsh5900/newapp'
             }
         }
-        stage('Remove images'){
+        stage('Delete the local image '){
             steps{
                 sh 'docker rmi -f $(docker images -q)'
             }
         }
-        stage('Pull image from DockerHub'){
+        stage('Download image from DockerHub :latest'){
             steps{
                 sh 'docker pull harsh5900/newapp'
             }
